@@ -1,3 +1,5 @@
+<?php wp_enqueue_script("jquery"); ?>
+
 <?php get_header() ?>
 
 <div class="content">

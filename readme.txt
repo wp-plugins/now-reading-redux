@@ -1,35 +1,35 @@
 === Now Reading Redux ===
 
-Contributors: ashodnakashian, bgunnink
+Contributors: ashodnakashian
 Donate link:
 Tags: wordpress, books, widget, amazon
 Requires at least: 2.7.0
-Tested up to: 3.2
+Tested up to: 3.2.1
 Stable tag: trunk
 
-Allows you to track and share the books read, in progress and a wishlist of future books to read, with cover art fetched automatically from Amazon.
+Allows you to track and share books you read, are reading and a wishlist of future books to read, with cover art fetched automatically from Amazon. Tracks and graphs reading statistics.
 
 == Description ==
 
 Now Reading Redux is a resurrection of the [Now Reading Reloaded project by Ben Gunnink] (http://heliologue.com/ "Now Reading Reloaded") 5.1.3.2 codebase, which was itself a fork/re-enlivening of [Rob Miller's original Now Reading plugin](http://robm.me.uk/projects/plugins/wordpress/now-reading/ "Original Now Reading Plugin").  It was forked from Rob's code as of 4.4.4svn, in order to update its interface to work with Wordpress 2.7 and above.
 
-With it, you can manage a library of your current books, as well as historical and planned books.
+With NRR, you can manage a library of your current books, as well as historical and planned books.
 
-The home of Now Reading Redux is [blog.ashodnakashian.com/projects/now-reading-redux/] (http://blog.ashodnakashian.com/projects/now-reading-redux/ "Now Reading Redux"). You may find news and leave comments there.
+NRR depends on jQuery and assumes it already loaded by WP or your theme. Please use a sufficiently recent version, say 1.4 or newer, preferably the latest. The graph is generated using TufteGraph (http://xaviershay.github.com/tufte-graph/ "TufteGraph") which depends on [Raphaël] (http://raphaeljs.com/ "Raphaël"). All necessary files are included, no additional libraries necessary (beyond jQuery).
+
+The home of Now Reading Redux is [blog.ashodnakashian.com/projects/now-reading-redux/] (http://blog.ashodnakashian.com/projects/now-reading-redux/ "Now Reading Redux"). You may find news and leave comments and requests there.
 
 For issues and complaints and for development source code, please go to [github.com/Ashod/Now-Reading-Redux] (https://github.com/Ashod/Now-Reading-Redux "Git repository").
 
-= Disclaimer =
+== Installation ==
 
 Please backup your database before installing/upgrading. I try hard to make sure the releases are bug-free. However I can't perform extensive tests. If you find any bugs or have feature requests, please kindly report them at https://github.com/Ashod/Now-Reading-Redux/issues.
-
-== Installation ==
 
 1. Upload `now-reading-redux` to the `/wp-content/plugins/` directory.
 1. Activate the plugin through the 'Plugins' menu in WordPress.
 1. Optionally, make any changes to the provided template files and store them in your theme directory (see the "Template Files" section.)
 
-== Upgrade ==
+= Upgrade =
 
 1. Just to be safe than sorry, backup your database.
 1. Deactivate any existing versions of `now-reading` or `now-reading-reloaded`.
@@ -38,6 +38,10 @@ Please backup your database before installing/upgrading. I try hard to make sure
 1. Your database will be updated and library restored as was previously.
 
 == Frequently Asked Questions ==
+
+= Can I upgrade from Now Reading or Now Reading Reloaded? How? =
+
+Please read the Upgrade section under Installation.
 
 = Where is the old changelog? =
 
@@ -53,6 +57,10 @@ Please find the original Now Reading Relaoded readme with the changelog in the r
 4. The search results may return more editions than older versions of the plugin. Clicking "Use This Result" adds the book in question to the library.
 
 == Changelog ==
+
+= 6.1.0.0 =
+* New feature: Reading statistics and graph shown in the library page by calling print_book_stats(). Uses TafteGraph/Raphaël.
+* Updated and included Suffusion NRR templates.
 
 = 6.0.9.0 =
 * New option: Hides Added dates in Manager and Book Edit pages.
@@ -82,6 +90,5 @@ Please find the original Now Reading Relaoded readme with the changelog in the r
 
 == Upgrade Notice ==
 
-= 6.0.9.0 =
-New options and features.
+Please read the changelog for reasons to upgrade.
 
