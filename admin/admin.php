@@ -16,7 +16,7 @@ class NowReadingReduxAdmin extends NowReadingRedux {
      * @since 6.0.0.0
      * @var int
      */
-    var $version = '6.0.4.0';
+    var $version = '6.1.5.0';
 
     /**
      * Full file system path to the main plugin file
@@ -94,8 +94,9 @@ class NowReadingReduxAdmin extends NowReadingRedux {
      * @since 6.0.0.0
      * @return none
      */
-    function register_settings () {
-        register_setting ( 'nowReadingOptions' , 'nowReadingOptions' , array ( &$this , 'update' ) );
+    function register_settings ()
+    {
+        register_setting (NOW_READING_OPTIONS, NOW_READING_OPTIONS, array( &$this , 'update' ));
     }
 
     /**
@@ -121,7 +122,7 @@ class NowReadingReduxAdmin extends NowReadingRedux {
                 //'AWSAccessKeyId'	=>	null,
                 //'SecretAccessKey'	=>	null,
                 'formatDate'		=>	'jS F Y',
-                'associate'			=>	'amodcon-20',
+                'associate'			=>	'thevoid0f-20',
 				'ignoreTime'		=>	false,
 				'hideAddedDate'		=>	false,
                 'debugMode'			=>	'false',
@@ -144,11 +145,16 @@ class NowReadingReduxAdmin extends NowReadingRedux {
      * @return none
      * @since 6.0.0.0
      */
-    function init () {
-        if ( ! get_option ( 'nowReadingOptions' ) )
-            add_option ( 'nowReadingOptions' , $this->defaults () );
+    function init ()
+    {
+        if (!get_option(NOW_READING_OPTIONS))
+        {
+            add_option(NOW_READING_OPTIONS, $this->defaults());
+        }
         else
+        {
             $this->check_upgrade();
+        }
     }
 
     /**
@@ -267,13 +273,14 @@ class NowReadingReduxAdmin extends NowReadingRedux {
      * @return none
      * @since 2.0.3
      */
-    function admin_page () {
+    function admin_page ()
+    {
         global $wpdb;
         ?>
 <div class="wrap">
     <h2><?php _e( 'Now Reading Redux' ); ?></h2>
     <form action="options.php" method="post">
-                <?php settings_fields('nowReadingOptions'); ?>
+                <?php settings_fields(NOW_READING_OPTIONS); ?>
         <table class="form-table">
             <tr valign="top">
                 <th scope="row">
@@ -327,7 +334,7 @@ class NowReadingReduxAdmin extends NowReadingRedux {
                     </p>
                     <p>
                         <span class="description">
-                                    <?php sprintf(__('If you don\'t have an Amazon Associates ID, you can either <a href=\'%s\'>get one</a>, or consider entering mine - <strong>%s</strong> - if you\'re feeling generous.', 'now-reading-redux'), "http://associates.amazon.com", "amodcon-20")?>
+                                    <?php sprintf(__('If you don\'t have an Amazon Associates ID, you can either <a href=\'%s\'>get one</a>, or consider entering mine - <strong>%s</strong> - if you\'re feeling generous.', 'now-reading-redux'), "http://associates.amazon.com", "thevoid0f-20")?>
                         </span>
                     </p>
                 </td>

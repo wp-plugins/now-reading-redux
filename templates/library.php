@@ -1,94 +1,76 @@
+<?php
+	global $book_query, $library_options, $shelf_title, $shelf_option;
+	$options = get_option(NOW_READING_OPTIONS);
+	$library_options = $options['libraryOptions'];
+?>
+
 <?php wp_enqueue_script("jquery"); ?>
 
-<?php get_header() ?>
+<?php get_header(); ?>
 
-<div class="content">
+<style type="text/css">
+	<?php echo $library_options['css'] ?>
+</style>
 
-	<div id="content" class="now-reading primary narrowcolumn">
+<div id="main-col">
+	<div id="container" class="now-reading nr_library">
+		<div id="content" role="main">
+			<div class="post fix nr-post">
+				<h1 class="post-title entry-title">Library</h1>
+			
+				<div class="bookdata fix">
+					
+					<?php if (can_now_reading_admin()) : ?>
+						<div class="manage">
+							<span class="icon">&nbsp;</span>
+							<p>Admin: &raquo; <a href="<?php manage_library_url() ?>">Manage Books</a></p>
+						</div>
+					<?php endif; ?>
 
-	<div class="post">
+					<?php if ($library_options['showStats']) : ?>
+						<h3>Statistics</h3>
+						<p><?php print_book_stats() ?></p>
+					<?php endif; ?>
 
-		<?php if( can_now_reading_admin() ) : ?>
+				</div>
 
-			<p>Admin: &raquo; <a href="<?php manage_library_url() ?>"><?php __('Manage Books', NRTD);?></a></p>
+				<div class="entry-content">
+				<?php
+					library_search_form();
 
-		<?php endif; ?>
+					// Reading.
+					$shelf_option = $library_options['readingShelf'];
+					$shelf_title = "<h3>" . $shelf_option['title'] . " (" . total_books('reading', 0) . ")</h3>";
+					$book_query = "status=reading&orderby=random";
+					nr_load_template('shelf.php', false);
+					
+					// Unread.
+					$shelf_option = $library_options['unreadShelf'];
+					$shelf_title = "<h3>" . $shelf_option['title'] . " (" . total_books('unread', 0) . ")</h3>";
+					$book_query = "status=unread&orderby=random";
+					nr_load_template('shelf.php', false);
+			
+					// On Hold.
+					$shelf_option = $library_options['onholdShelf'];
+					$shelf_title = "<h3>" . $shelf_option['title'] . " (" . total_books('onhold', 0) . ")</h3>";
+					$book_query = "status=onhold&orderby=random";
+					nr_load_template('shelf.php', false);
+			
+					// Read.
+					$shelf_option = $library_options['readShelf'];
+					$shelf_title = "<h3>" . $shelf_option['title'] . " (" . total_books('read', 0) . ")</h3>";
+					$book_query = "status=read&orderby=finished&order=desc";
+					nr_load_template('shelf.php', false);
 
-		<p><?php print_book_stats() ?></p>
+					do_action('nr_footer');
+				?>
+				</div><!-- .entry-content -->
+			</div><!-- .post -->
+		</div><!-- #content -->
+	</div><!-- #container -->
 
-		<?php library_search_form() ?>
-
-		<h2>Currently Reading (<?php echo total_books('reading', 0) ?>):</h2>
-
-		<?php if( have_books('status=reading&orderby=random&num=-1') ) : ?>
-
-			<ul>
-
-			<?php while( have_books('status=reading&orderby=random&num=-1') ) : the_book(); ?>
-
-				<li>
-					<p><a href="<?php book_permalink() ?>"><img src="<?php book_image() ?>" alt="<?php book_title() ?>" /></a></p>
-					<p><a href="<?php book_permalink() ?>"><?php book_title() ?></a> by <a href="<?php book_author_permalink() ?>"><?php book_author() ?></a></p>
-				</li>
-
-			<?php endwhile; ?>
-
-			</ul>
-
-		<?php else : ?>
-
-			<p>None</p>
-
-		<?php endif; ?>
-
-		<h2>Planned books (<?php echo total_books('unread', 0) ?>):</h2>
-
-		<?php if( have_books('status=unread&orderby=random&num=-1') ) : ?>
-
-			<ul>
-
-			<?php while( have_books('status=unread&orderby=random&num=-1') ) : the_book(); ?>
-
-				<li><a href="<?php book_permalink() ?>"><?php book_title() ?></a> by <a href="<?php book_author_permalink() ?>"><?php book_author() ?></a></li>
-
-			<?php endwhile; ?>
-
-			</ul>
-
-		<?php else : ?>
-
-			<p>None</p>
-
-		<?php endif; ?>
-
-		<h2>Finished Reading (<?php echo total_books('read', 0) ?>):</h2>
-
-		<?php if( have_books('status=read&orderby=finished&order=desc&num=-1') ) : ?>
-
-			<ul>
-
-			<?php while( have_books('status=read&orderby=finished&order=desc&num=-1') ) : the_book(); ?>
-
-				<li><a href="<?php book_permalink() ?>"><?php book_title() ?></a> by <a href="<?php book_author_permalink() ?>"><?php book_author() ?></a></li>
-
-			<?php endwhile; ?>
-
-			</ul>
-
-		<?php else : ?>
-
-			<p>None</p>
-
-		<?php endif; ?>
-
-		<?php do_action('nr_footer'); ?>
-
-	</div>
-
-	</div>
-
+	<?php get_sidebar() ?>
+	
 </div>
 
-<?php get_sidebar() ?>
-
-<?php get_footer() ?>
+<?php get_footer(); ?>

@@ -1,22 +1,183 @@
 <?php
 /*
 Plugin Name: Now Reading Redux
-Version: 6.1.0.0
+Version: 6.5.0.0
 Plugin URI: http://wordpress.org/extend/plugins/now-reading-redux/
 Description: Display the books you're reading, have read recently and plan to read, with cover art fetched automatically from Amazon.
 Author: Ashod Nakashian
-Author URI: http://ashodnakashian.com
+Author URI: http://blog.ashodnakashian.com
 */
 
-define('NOW_READING_VERSION', '6.1.0.0');
-define('NOW_READING_DB', 57);
-define('NOW_READING_OPTIONS', 13);
-define('NOW_READING_REWRITE', 9);
+define('NOW_READING_VERSION', '6.5.0.0');
+define('NOW_READING_DB_VERSION', 58);
+define('NOW_READING_OPTIONS_VERSION', 17);
+define('NOW_READING_REWRITE_VERSION', 9);
 
 define('NRTD', 'now-reading');
+define('NOW_READING_OPTIONS', 'nowReadingOptions');
+define('NOW_READING_VERSIONS', 'nowReadingVersions');
 
 define('NR_MENU_SINGLE', 2);
 define('NR_MENU_MULTIPLE', 4);
+
+define('DEFAULT_SIDEBAR_CSS',
+'div.booklisting img {
+	border: 1px solid #c0c0c0;
+	padding: 3px 3px 3px 3px;
+	margin: 0 5px 5px 5px;
+	width: 67px;    /* Jacket image width. */
+	height: 100px;  /* Jacket image height. */
+}
+.nr_widget {
+	padding-bottom: 20px;
+}
+.nr_widget h4 {
+	padding: 5px;
+	border: 1px solid #ccc;
+	font: bold 100%/100% Arial, Helvetica, sans-serif;
+	margin: 20px 0 5px 0;
+	clear: both;
+	-moz-border-radius: 5px;
+	-khtml-border-radius: 5px;
+	-webkit-border-radius: 5px;
+	border-radius: 5px;
+}
+.nr_widget input {
+	-moz-border-radius: 5px;
+	-khtml-border-radius: 5px;
+	-webkit-border-radius: 5px;
+	border-radius: 5px;
+}
+.nr_widget ul {
+    list-style-type: none;
+    padding: 0px;
+    margin: 0px;
+}
+.nr_widget li {
+    list-style-type: none;
+    padding: 0px;
+    margin: 0px;
+    display: -moz-inline-box;
+    -moz-box-orient: vertical;
+    display: inline-block;
+    vertical-align:top;
+    word-wrap: break-word;
+}
+* html .nr_widget li {
+    display: inline;
+}
+* + html .nr_widget li {
+    display: inline;
+}
+.nr_widget #content td {
+	padding: 6px;
+	border-top: 0px;
+	border-bottom: 1px dotted #ccc;
+}
+.nr_widget #content table {
+	border: 0px;
+	border-collapse: collapse;
+	margin: 0 -1px 24px 0;
+	text-align: center;
+	width: 100%;
+}
+.nr_widget:hover .nr_ads {
+	display: block !important;
+}
+.nr_wishlist {
+	text-align: center;
+	padding: 3px;
+	padding-bottom: 5px;
+}
+');
+
+define('DEFAULT_LIBRARY_CSS',
+'.nr_library div.booklisting img {
+	border: 1px solid #c0c0c0;
+	padding: 5px 5px 5px 5px;
+	margin: 0 12px 12px 12px;
+	width: 108px;	/* Jacket image width. */
+	height: 160px;	/* Jacket image height. */
+}
+.nr_library h3 {
+	padding: 5px;
+	border: 1px solid #ccc;
+	font: bold 100%/100% Arial, Helvetica, sans-serif;
+	margin: 20px 0 5px 0;
+	clear: both;
+	-moz-border-radius: 5px;
+	-khtml-border-radius: 5px;
+	-webkit-border-radius: 5px;
+	border-radius: 5px;
+}
+.nr_library input {
+	-moz-border-radius: 5px;
+	-khtml-border-radius: 5px;
+	-webkit-border-radius: 5px;
+	border-radius: 5px;
+}
+.nr_library ul {
+    list-style-type: none;
+    padding: 0px;
+    margin: 0px;
+}
+.nr_library li {
+    list-style-type: none;
+    padding: 0px;
+    margin: 0px;
+    display: -moz-inline-box;
+    -moz-box-orient: vertical;
+    display: inline-block;
+    vertical-align:top;
+    word-wrap: break-word;
+}
+* html .nr_library li {
+    display: inline;
+}
+* + html .nr_library li {
+    display: inline;
+}
+.nr_library #content td {
+	padding: 6px;
+	border-top: 0px;
+	border-bottom: 1px dotted #ccc;
+}
+.nr_library #content table {
+	border: 0px;
+	border-collapse: collapse;
+	margin: 0 -1px 24px 0;
+	text-align: center;
+	width: 100%;
+}
+');
+
+define('DEFAULT_SEARCH_CSS', DEFAULT_LIBRARY_CSS);
+
+/*
+ div.booklisting {
+	list-style: none;
+}
+div.booklisting,
+div.bookentry {
+	margin:  10px 0;
+}
+
+div.bookentry {
+	display: inline-block;
+}
+
+ .nr_widget li > * {
+    display: table;
+    table-layout: fixed;
+    overflow: hidden;
+}
+* html .nr_widget li { // for IE 6
+    width: 80px;
+}
+.nr_widget li > * { // for all other browser
+    width: 80px;
+}
+*/
 
 /**
  * Load our l18n domain.
@@ -25,16 +186,22 @@ $locale = get_locale();
 $path = "wp-content/plugins/now-reading-redux/translations/$locale";
 load_plugin_textdomain(NRTD, $path);
 
+define('DEFAULT_UNREAD_TITLE', 'Planned');
+define('DEFAULT_ONHOLD_TITLE', 'On Hold');
+define('DEFAULT_READING_TITLE', 'Reading');
+define('DEFAULT_READ_TITLE', 'Finished');
+define('DEFAULT_SEARCH_TITLE', 'Search Results');
+
 /**
  * Array of the statuses that books can be.
  * @global array $GLOBALS['nr_statuses']
  * @name $nr_statuses
  */
 $nr_statuses = apply_filters('nr_statuses', array(
-    'unread'	=> __('Yet to read', NRTD),
-    'onhold'	=> __('On Hold', NRTD),
-    'reading'	=> __('Currently reading', NRTD),
-    'read'		=> __('Finished', NRTD)
+    'unread'	=> __(DEFAULT_UNREAD_TITLE, NRTD),
+    'onhold'	=> __(DEFAULT_ONHOLD_TITLE, NRTD),
+    'reading'	=> __(DEFAULT_READING_TITLE, NRTD),
+    'read'		=> __(DEFAULT_READ_TITLE, NRTD)
 ));
 
 /**
@@ -62,6 +229,51 @@ $nr_domains = array(
     '.ca'		=> __('Canada', NRTD)
 );
 
+/**
+ * Array of the default library options.
+ * @global array $GLOBALS['def_library_options']
+ * @name $def_library_options
+ */
+$def_library_options = array(
+    'readingShelf'	=> array('viz' => 'show_image_text', 'title' => DEFAULT_READING_TITLE),
+    'unreadShelf'	=> array('viz' => 'show_image_text', 'title' => DEFAULT_UNREAD_TITLE),
+    'onholdShelf'	=> array('viz' => 'hide', 'title' => DEFAULT_ONHOLD_TITLE),
+    'readShelf'		=> array('viz' => 'show_image_text', 'title' => DEFAULT_READ_TITLE),
+	'css'			=> DEFAULT_LIBRARY_CSS,
+	'renderStyle'	=> 'list',
+    'itemsPerTableRow'	=> 4,
+	'showStats'		=> true
+);
+
+/**
+ * Array of the default sidebar options.
+ * @global array $GLOBALS['def_sidebar_options']
+ * @name $def_sidebar_options
+ */
+$def_sidebar_options = array(
+    'readingShelf'	=> array('viz' => 'show_image', 'title' => DEFAULT_READING_TITLE, 'maxItems' => 3),
+    'unreadShelf'	=> array('viz' => 'show_image', 'title' => DEFAULT_UNREAD_TITLE, 'maxItems' => 3),
+    'onholdShelf'	=> array('viz' => 'hide', 'title' => DEFAULT_ONHOLD_TITLE, 'maxItems' => 3),
+    'readShelf'		=> array('viz' => 'show_image', 'title' => DEFAULT_READ_TITLE, 'maxItems' => 3),
+	'css'			=> DEFAULT_SIDEBAR_CSS,
+	'renderStyle'	=> 'list',
+    'itemsPerTableRow'	=> 3,
+);
+
+/**
+ * Array of the default search options.
+ * @global array $GLOBALS['def_sidebar_options']
+ * @name $def_sidebar_options
+ */
+$def_sidebar_options = array(
+	'viz' 			=> 'show_image_text',
+	'title' 		=> DEFAULT_SEARCH_TITLE,
+	'maxItems' 		=> 25,
+	'css'			=> DEFAULT_SEARCH_CSS,
+	'renderStyle'	=> 'list',
+    'itemsPerTableRow'	=> 4,
+);
+
 // Include other functionality
 require_once dirname(__FILE__) . '/compat.php';
 require_once dirname(__FILE__) . '/url.php';
@@ -73,15 +285,16 @@ require_once dirname(__FILE__) . '/template-functions.php';
 require_once dirname(__FILE__) . '/widget.php';
 
 /**
- * Checks if the install needs to be run by checking the `nowReadingVersions` option, which stores the current installed database, options and rewrite versions.
+ * Checks if the install needs to be run by checking the NOW_READING_VERSIONS option,
+ * which stores the current installed database, options and rewrite versions.
  */
 function nr_check_versions()
 {
-    $versions = get_option('nowReadingVersions');
+    $versions = get_option(NOW_READING_VERSIONS);
     if (empty($versions) ||
-		$versions['db'] < NOW_READING_DB ||
-		$versions['options'] < NOW_READING_OPTIONS ||
-		$versions['rewrite'] < NOW_READING_REWRITE)
+		$versions['db'] < NOW_READING_DB_VERSION ||
+		$versions['options'] < NOW_READING_OPTIONS_VERSION ||
+		$versions['rewrite'] < NOW_READING_REWRITE_VERSION)
     {
 		nr_install();
     }
@@ -90,7 +303,7 @@ add_action('init', 'nr_check_versions');
 add_action('plugins_loaded', 'nr_check_versions');
 
 function nr_check_api_key() {
-    $options = get_option('nowReadingOptions');
+    $options = get_option(NOW_READING_OPTIONS);
     $AWSAccessKeyId = $options['AWSAccessKeyId'];
     $SecretAccessKey = $options['SecretAccessKey'];
 
@@ -107,14 +320,15 @@ function nr_check_api_key() {
 }
 add_action('init','nr_check_api_key');
 
-
 /**
  * Handler for the activation hook. Installs/upgrades the database table and adds/updates the nowReadingOptions option.
  */
-function nr_install() {
+function nr_install()
+{
     global $wpdb, $wp_rewrite, $wp_version;
 
-    if ( version_compare('2.0', $wp_version) == 1 && strpos($wp_version, 'wordpress-mu') === false ) {
+    if (version_compare('2.0', $wp_version) == 1 && strpos($wp_version, 'wordpress-mu') === false)
+	{
         echo '
 		<p>(Now Reading Redux only works with WordPress 2.0 and above, sorry!)</p>
 		';
@@ -124,6 +338,7 @@ function nr_install() {
     // WP's dbDelta function takes care of installing/upgrading our DB table.
     $upgrade_file = file_exists(ABSPATH . 'wp-admin/includes/upgrade.php') ? ABSPATH . 'wp-admin/includes/upgrade.php' : ABSPATH . 'wp-admin/upgrade-functions.php';
     require_once $upgrade_file;
+	
     // Until the nasty bug with duplicate indexes is fixed, we should hide dbDelta output.
     ob_start();
     dbDelta("
@@ -187,8 +402,11 @@ function nr_install() {
     $defaultOptions = array(
         'formatDate'	=> 'jS F Y',
 		'ignoreTime'	=> false,
-		'hideAddedDate'		=>	false,
-        'associate'		=> 'amodcon-20',
+		'hideAddedDate'	=>	false,
+		'sidebarOptions' => $def_library_options,
+		'libraryOptions' => $def_sidebar_options,
+		'wishlistUrl'	=>  '',
+        'associate'		=> 'thevoid0f-20',
         'domain'		=> '.com',
         'imageSize'		=> 'Medium',
         'httpLib'		=> 'snoopy',
@@ -196,15 +414,14 @@ function nr_install() {
         'debugMode'		=> false,
         'menuLayout'	=> NR_MENU_SINGLE,
         'booksPerPage'  => 15,
-        'defBookCount'  => 5,
         'permalinkBase' => 'library/'
     );
-    add_option('nowReadingOptions', $defaultOptions);
+    add_option(NOW_READING_OPTIONS, $defaultOptions);
 
     // Merge any new options to the existing ones.
-    $options = get_option('nowReadingOptions');
+    $options = get_option(NOW_READING_OPTIONS);
     $options = array_merge($defaultOptions, $options);
-    update_option('nowReadingOptions', $options);
+    update_option(NOW_READING_OPTIONS, $options);
 
 	// May be unset if called during plugins_loaded action.
 	if (isset($wp_rewrite))
@@ -255,8 +472,8 @@ function nr_install() {
     }
 
     // Set an option that stores the current installed versions of the database, options and rewrite.
-    $versions = array('db' => NOW_READING_DB, 'options' => NOW_READING_OPTIONS, 'rewrite' => NOW_READING_REWRITE);
-    update_option('nowReadingVersions', $versions);
+    $versions = array('db' => NOW_READING_DB_VERSION, 'options' => NOW_READING_OPTIONS_VERSION, 'rewrite' => NOW_READING_REWRITE_VERSION);
+    update_option(NOW_READING_VERSIONS, $versions);
 }
 register_activation_hook('now-reading-redux/now-reading.php', 'nr_install');
 
@@ -386,21 +603,28 @@ add_action('template_redirect', 'library_init');
  * Loads the given filename from either the current theme's now-reading directory or, if that doesn't exist, the Now Reading templates directory.
  * @param string $filename The filename of the template to load.
  */
-function nr_load_template( $filename ) {
+function nr_load_template($filename, $require_once = true)
+{
     $filename = basename($filename);
     $template = TEMPLATEPATH ."/now-reading-redux/$filename";
 
 	/*  check `now-reading` for backwards compatibility */
-    if ( !file_exists($template) )
-        $template = TEMPLATEPATH ."/now-reading/$filename";
+    if (!file_exists($template))
+    {
+		$template = TEMPLATEPATH ."/now-reading/$filename";
+	}
 
-    if ( !file_exists($template) )
-        $template = dirname(__FILE__)."/templates/$filename";
+    if (!file_exists($template))
+    {
+		$template = dirname(__FILE__)."/templates/$filename";
+	}
 
-    if ( !file_exists($template) )
-        return new WP_Error('template-missing', sprintf(__("Oops! The template file %s could not be found in either the Now Reading template directory or your theme's Now Reading directory.", NRTD), "<code>$filename</code>"));
+    if (!file_exists($template))
+    {
+		return new WP_Error('template-missing', sprintf(__("Oops! The template file %s could not be found in either the Now Reading template directory or your theme's Now Reading directory.", NRTD), "<code>$filename</code>"));
+	}
 
-    load_template($template);
+    load_template($template, $require_once);
 }
 
 /**

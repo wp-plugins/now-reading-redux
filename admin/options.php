@@ -19,9 +19,46 @@ if ( !empty($_POST['update']) ) {
 
     $append = '';
 
+    $options['libraryOptions']['readingShelf']['viz'] = trim($_POST['libraryReadingShelfViz']);
+    $options['libraryOptions']['readingShelf']['title'] = trim($_POST['libraryReadingShelfTitle']);
+    $options['libraryOptions']['unreadShelf']['viz'] = trim($_POST['libraryUnreadShelfViz']);
+    $options['libraryOptions']['unreadShelf']['title'] = trim($_POST['libraryUnreadShelfTitle']);
+    $options['libraryOptions']['onholdShelf']['viz'] = trim($_POST['libraryOnholdShelfViz']);
+    $options['libraryOptions']['onholdShelf']['title'] = trim($_POST['libraryOnholdShelfTitle']);
+    $options['libraryOptions']['readShelf']['viz'] = trim($_POST['libraryReadShelfViz']);
+    $options['libraryOptions']['readShelf']['title'] = trim($_POST['libraryReadShelfTitle']);
+    $options['libraryOptions']['css'] = trim($_POST['libraryCss']);
+	$options['libraryOptions']['renderStyle'] = trim($_POST['libraryRenderStyle']);
+    $options['libraryOptions']['itemsPerTableRow'] = trim($_POST['libraryItemsPerTableRow']);
+    $options['libraryOptions']['showStats'] = trim($_POST['libraryShowStats']);
+
+    $options['sidebarOptions']['readingShelf']['viz'] = trim($_POST['sidebarReadingShelfViz']);
+    $options['sidebarOptions']['readingShelf']['title'] = trim($_POST['sidebarReadingShelfTitle']);
+    $options['sidebarOptions']['readingShelf']['maxItems'] = trim($_POST['sidebarReadingShelfMaxItems']);
+    $options['sidebarOptions']['unreadShelf']['viz'] = trim($_POST['sidebarUnreadShelfViz']);
+    $options['sidebarOptions']['unreadShelf']['title'] = trim($_POST['sidebarUnreadShelfTitle']);
+    $options['sidebarOptions']['unreadShelf']['maxItems'] = trim($_POST['sidebarUnreadShelfMaxItems']);
+    $options['sidebarOptions']['onholdShelf']['viz'] = trim($_POST['sidebarOnholdShelfViz']);
+    $options['sidebarOptions']['onholdShelf']['title'] = trim($_POST['sidebarOnholdShelfTitle']);
+    $options['sidebarOptions']['onholdShelf']['maxItems'] = trim($_POST['sidebarOnholdShelfMaxItems']);
+    $options['sidebarOptions']['readShelf']['viz'] = trim($_POST['sidebarReadShelfViz']);
+    $options['sidebarOptions']['readShelf']['title'] = trim($_POST['sidebarReadShelfTitle']);
+    $options['sidebarOptions']['readShelf']['maxItems'] = trim($_POST['sidebarReadShelfMaxItems']);
+    $options['sidebarOptions']['css'] = trim($_POST['sidebarCss']);
+	$options['sidebarOptions']['renderStyle'] = trim($_POST['sidebarRenderStyle']);
+    $options['sidebarOptions']['itemsPerTableRow'] = trim($_POST['sidebarItemsPerTableRow']);
+
+	$options['searchOptions']['viz'] = trim($_POST['searchViz']);
+	$options['searchOptions']['title'] = trim($_POST['searchTitle']);
+	$options['searchOptions']['maxItems'] = trim($_POST['searchMaxItems']);
+	$options['searchOptions']['css'] = trim($_POST['searchCss']);
+	$options['searchOptions']['renderStyle'] = trim($_POST['searchRenderStyle']);
+	$options['searchOptions']['itemsPerTableRow'] = trim($_POST['searchItemsPerTableRow']);
+
 	$options['AWSAccessKeyId']  = trim($_POST['AWSAccessKeyId']);
     $options['SecretAccessKey'] = trim($_POST['SecretAccessKey']);
     $options['formatDate']		= trim($_POST['format_date']);
+    $options['wishlistUrl']		= trim($_POST['wishlist_url']);
     $options['associate']		= trim($_POST['associate']);
     $options['ignoreTime']		= trim($_POST['ignore_time']);
     $options['hideAddedDate']	= trim($_POST['hide_added_date']);
@@ -32,7 +69,6 @@ if ( !empty($_POST['update']) ) {
     $options['proxyHost']		= trim($_POST['proxy_host']);
     $options['proxyPort']		= trim($_POST['proxy_port']);
     $options['booksPerPage']    = trim($_POST['books_per_page']);
-    $options['defBookCount']    = trim($_POST['def_book_count']);
     $options['permalinkBase']   = trim($_POST['permalink_base']);
     $options['multiuserMode']   = trim($_POST['multiuser_mode']);
 
@@ -61,7 +97,7 @@ if ( !empty($_POST['update']) ) {
         $options['httpLib'] = 'snoopy';
     }
 
-    update_option('nowReadingOptions', $options);
+    update_option(NOW_READING_OPTIONS, $options);
 
     global $wp_rewrite;
     if ($wp_rewrite->using_mod_rewrite_permalinks() ) {

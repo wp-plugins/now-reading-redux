@@ -14,7 +14,7 @@ if ( !function_exists('now_reading_add') ) {
 
         global $wpdb;
 
-        $options = get_option('nowReadingOptions');
+        $options = get_option(NOW_READING_OPTIONS);
 
         if( !$nr_url ) {
             $nr_url = new nr_url();
@@ -47,6 +47,7 @@ if ( !function_exists('now_reading_add') ) {
 		<div class="wrap">
 
 			<h2>Now Reading Redux</h2>
+			<i>Version: ' . NOW_READING_VERSION . '</i>
 		';
 
         if (  !empty($_POST['u_isbn']) || !empty($_POST['u_author']) || !empty($_POST['u_title']) ) {

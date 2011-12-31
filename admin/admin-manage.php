@@ -7,15 +7,15 @@
 /**
  * Creates the manage admin page, and deals with the creation and editing of reviews.
  */
-function nr_manage() {
-
+function nr_manage()
+{
     global $wpdb, $nr_statuses, $nr_post_options, $userdata;
 
     get_currentuserinfo();
 
     $_POST = stripslashes_deep($_POST);
 
-    $options = get_option('nowReadingOptions');
+    $options = get_option(NOW_READING_OPTIONS);
 
     if (!$nr_url)
 	{
@@ -58,7 +58,7 @@ function nr_manage() {
     $action = $_GET['action'];
     nr_reset_vars(array('action'));
 
-	$options = get_option('nowReadingOptions');
+	$options = get_option(NOW_READING_OPTIONS);
 	$dateTimeFormat = 'Y-m-d H:i:s';
 	if ($options['ignoreTime'])
 	{
@@ -277,8 +277,9 @@ function nr_manage() {
 						<small>' . __("If you wish, you can link this book to a blog entry by entering that entry's ID here. The entry will be linked to from the book's library page.", NRTD) . '</small>
 					</td>
 				</tr>';
-
+				
 				// Post Option.
+				/*
 				echo '
 				<tr class="form-field">
 					<th valign="top" scope="row">
@@ -304,7 +305,8 @@ function nr_manage() {
 						</select>
 					</td>
 				</tr>';
-
+				*/
+				
 				// Meta Data.
 				echo '
 				<tr class="form-field">
@@ -485,6 +487,7 @@ function nr_manage() {
 				<div class="wrap">
 
 					<h2>Now Reading Redux</h2>
+					<i>Version: ' . NOW_READING_VERSION . '</i>
 
 						<form method="get" action="" onsubmit="location.href += \'&q=\' + document.getElementById(\'q\').value; return false;">
 							<p class="search-box"><label class="hidden" for="q">' . __("Search Books", NRTD) . ':</label> <input type="text" name="q" id="q" value="' . htmlentities($_GET['q']) . '" /> <input class="button" type="submit" value="' . __('Search Books', NRTD) . '" /></p>

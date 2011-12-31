@@ -20,7 +20,7 @@ function get_books($query, $show_private = false) {
 
     global $wpdb;
 
-    $options = get_option('nowReadingOptions');
+    $options = get_option(NOW_READING_OPTIONS);
 
     parse_str($query);
 
@@ -80,12 +80,6 @@ function get_books($query, $show_private = false) {
             $orderby = 'b_added';
             break;
     }
-
-    if (empty($num))
-    {
-		// The default number of books if unspecified.
-		$num = $options['defBookCount'];
-	}
 
     if ( $num > -1 && $offset >= 0 ) {
         $offset	= intval($offset);
@@ -172,7 +166,7 @@ function get_books($query, $show_private = false) {
 function get_book($id) {
     global $wpdb;
 
-    $options = get_option('nowReadingOptions');
+    $options = get_option(NOW_READING_OPTIONS);
 
     $id = intval($id);
 

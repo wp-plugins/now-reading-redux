@@ -3,9 +3,7 @@
 * Show the library by year/month.
 * Show library by category/tag.
 * Replace book page by post.
-* Choose what to show in the Widget.
 * Rate.
-* Progress info per Book.
 * Icons for Book status.
 * Use calendar UI for dates.
 * Search filter is appending to URL.
@@ -17,12 +15,17 @@
 * Add admin menu.
 * Add reading progress.
 * Update translations.
+* Remove all explicit includes.
+* Replace options with automatic handling.
 
+- Library search broken and unlike manage-books search.
+- Choose what to show in the Widget.
 - Show statistics in Library.
 - Public/Private visibility.
 - Hide added dates.
 - Link authors in the Manager page to filter by that author only.
 - Filter by Read/Reading/OnHold in the manager.
+- FAQ: file_get_contents needs allow_url_fopen.
 
 Performance:
 

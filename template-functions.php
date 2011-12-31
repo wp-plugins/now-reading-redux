@@ -28,7 +28,7 @@ $book = null;
  * @param string The date to format, in any string recogniseable by strtotime.
  */
 function nr_format_date( $date ) {
-    $options = get_option('nowReadingOptions');
+    $options = get_option(NOW_READING_OPTIONS);
     if ( !is_numeric($date) )
         $date = strtotime($date);
     if ( empty($date) )
@@ -42,6 +42,21 @@ function nr_format_date( $date ) {
  */
 function nr_empty_date( $date ) {
     return ( empty($date) || $date == "0000-00-00 00:00:00" );
+}
+
+/*
+ * Returns an html-entity escaped string of $value (if not empty) or
+ * of the translation of $default (if value is empty).
+ */
+function text_or_default($value, $default)
+{
+    $text = $value;
+    if (empty($text))
+    {
+        $text = __($default, NRTD);
+    }
+    
+    return htmlentities($text, ENT_QUOTES, "UTF-8");
 }
 
 /**
@@ -469,7 +484,7 @@ function average_books($time_period = 'week', $echo = true, $absolute = true)
  */
 function book_permalink( $echo = true, $id = 0 ) {
     global $book, $wpdb;
-    $options = get_option('nowReadingOptions');
+    $options = get_option(NOW_READING_OPTIONS);
 
     if ( !empty($book) && empty($id) )
         $the_book = $book;
@@ -503,7 +518,7 @@ function book_permalink( $echo = true, $id = 0 ) {
 function book_author_permalink( $echo = true, $author = null ) {
     global $book, $wpdb;
 
-    $options = get_option('nowReadingOptions');
+    $options = get_option(NOW_READING_OPTIONS);
 
     if ( !$author )
         $author = $book->author;
@@ -532,7 +547,7 @@ function book_author_permalink( $echo = true, $author = null ) {
 function book_reader_permalink( $echo = true, $reader = 0) { //added by B. Spyckerelle for multiuser mode
     global $book, $wpdb;
 
-    $options = get_option('nowReadingOptions');
+    $options = get_option(NOW_READING_OPTIONS);
 
     if ( !$reader )
         $reader = $book->reader;
@@ -560,7 +575,7 @@ function book_reader_permalink( $echo = true, $reader = 0) { //added by B. Spyck
  */
 function book_url( $echo = true, $domain = null ) {
     global $book;
-    $options = get_option('nowReadingOptions');
+    $options = get_option(NOW_READING_OPTIONS);
 
     if ( empty($domain) )
         $domain = $options['domain'];
@@ -669,7 +684,7 @@ function is_custom_book() {
 function can_now_reading_admin() {
 
 //depends on multiuser mode (B. Spyckerelle)
-    $options = get_option('nowReadingOptions');
+    $options = get_option(NOW_READING_OPTIONS);
     $nr_level = $options['multiuserMode'] ? 'level_2' : 'level_9';
 
     return current_user_can($nr_level);
@@ -700,7 +715,7 @@ function is_my_book()
  * @param bool $echo Whether or not to echo the results.
  */
 function library_url( $echo = true ) {
-    $options = get_option('nowReadingOptions');
+    $options = get_option(NOW_READING_OPTIONS);
 
     if ( $options['useModRewrite'] )
         $url = get_option('home') . "/" . preg_replace("/^\/|\/+$/", "", $options['permalinkBase']);
@@ -747,7 +762,7 @@ function book_review( $echo = true ) {
  * @param bool $echo Whether or not to echo the results.
  */
 function search_url( $echo = true ) {
-    $options = get_option('nowReadingOptions');
+    $options = get_option(NOW_READING_OPTIONS);
 
     if ( $options['useModRewrite'] )
         $url = get_option('home') . "/" . preg_replace("/^\/|\/+$/", "", $options['permalinkBase']) . "/search";
@@ -779,8 +794,9 @@ function search_query( $echo = true ) {
  * Prints a standard search form for users who don't want to create their own.
  * @param bool $echo Whether or not to echo the results.
  */
-function library_search_form( $echo = true ) {
-    $options = get_option('nowReadingOptions');
+function library_search_form($echo = true)
+{
+    $options = get_option(NOW_READING_OPTIONS);
 
     $html = '
 	<form method="get" action="' . search_url(0) . '">
@@ -792,8 +808,8 @@ function library_search_form( $echo = true ) {
     }
 
     $html .= '
+		<div style="text-align:center">
 		<input type="text" name="q" />
-		<div align=center>
 		<input type="submit" value="' . __("Search Library", NRTD) . '" />
 		</div>
 	</form>
@@ -893,7 +909,7 @@ function print_book_tags( $echo = true ) {
  * @param bool $echo Whether or not to echo the results.
  */
 function book_tag_url( $tag, $echo = true ) {
-    $options = get_option('nowReadingOptions');
+    $options = get_option(NOW_READING_OPTIONS);
 
     if ( $options['useModRewrite'] )
         $url = get_option('home') . "/" . preg_replace("/^\/|\/+$/", "", $options['permalinkBase']) . "/tag/" . urlencode($tag);
@@ -913,7 +929,7 @@ function book_tag_url( $tag, $echo = true ) {
  * @param bool $echo Whether or not to echo the results.
  */
 function library_page_url( $page, $echo = true ) {
-    $options = get_option('nowReadingOptions');
+    $options = get_option(NOW_READING_OPTIONS);
 
     if ( $options['useModRewrite'] )
         $url = get_option('home') . "/" . preg_replace("/^\/|\/+$/", "", $options['permalinkBase']) . "/page/" . urlencode($page);
@@ -925,6 +941,32 @@ function library_page_url( $page, $echo = true ) {
     if ( $echo )
         echo $url;
     return $url;
+}
+
+/**
+ * Returns the Wishlist URL if any.
+ * @param bool $echo Whether or not to echo the results.
+ */
+function wishlist_url($echo = true)
+{
+    $options = get_option(NOW_READING_OPTIONS);
+
+    $url = $options['wishlistUrl'];
+    if ($echo)
+    {
+        echo $url;
+    }
+    
+    return $url;
+}
+
+/**
+ * Returns true if we have a Wishlist URL.
+ */
+function have_wishlist_url()
+{
+    $url = wishlist_url(false);
+    return !empty($url);
 }
 
 /**

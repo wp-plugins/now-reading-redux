@@ -1,68 +1,58 @@
-<div class="now-reading">
+<?php
+	global $book_query, $library_options, $shelf_title, $shelf_option;
+	$options = get_option(NOW_READING_OPTIONS);
+	$library_options = $options['sidebarOptions'];
+?>
 
-	<h3>Current books:</h3>
+<style type="text/css">
+	<?php echo $library_options['css'] ?>
+</style>
 
-	<?php if( have_books('status=reading&orderby=random') ) : ?>
+<div class="now-reading nr_widget">
 
-		<ul>
+	<div style="text-align:center">
+		<br /><b><a href="<?php library_url() ?>">View Full Library</a></b>
+	</div>
 
-		<?php while( have_books('status=reading&orderby=random') ) : the_book(); ?>
+	<?php
+		// Reading.
+		$shelf_option = $library_options['readingShelf'];
+		$shelf_title = "<h4>" . $shelf_option['title'] . " (" . total_books('reading', 0) . ")</h4>";
+		$book_query = "status=reading&orderby=random&num=" . $shelf_option['maxItems'];
+		nr_load_template('shelf.php', false);
 
-			<li>
-				<p><a href="<?php book_permalink() ?>"><img src="<?php book_image() ?>" alt="<?php book_title() ?>" /></a></p>
-				<p><strong><?php book_title() ?></strong> by <?php book_author() ?></p>
-			</li>
+		// Unread.
+		$shelf_option = $library_options['unreadShelf'];
+		$shelf_title = "<h4>" . $shelf_option['title'] . " (" . total_books('unread', 0) . ")</h4>";
+		$book_query = "status=unread&orderby=random&num=" . $shelf_option['maxItems'];
+		nr_load_template('shelf.php', false);
 
-		<?php endwhile; ?>
+		// On Hold.
+		$shelf_option = $library_options['onholdShelf'];
+		$shelf_title = "<h4>" . $shelf_option['title'] . " (" . total_books('onhold', 0) . ")</h4>";
+		$book_query = "status=onhold&orderby=random&num=" . $shelf_option['maxItems'];
+		nr_load_template('shelf.php', false);
 
-		</ul>
+		// Read.
+		$shelf_option = $library_options['readShelf'];
+		$shelf_title = "<h4>" . $shelf_option['title'] . " (" . total_books('read', 0) . ")</h4>";
+		$book_query = "status=read&orderby=finished&order=desc&num=" . $shelf_option['maxItems'];
+		nr_load_template('shelf.php', false);
+	?>
 
-	<?php else : ?>
-
-		<p>None</p>
-
+	</div>
+    
+	<?php if (have_wishlist_url()) : ?>
+		<div class="nr_wishlist"><b><a href="<?php wishlist_url() ?>">Buy me a gift!</a></b></div>
 	<?php endif; ?>
-
-	<h3>Planned books:</h3>
-
-	<?php if( have_books('status=unread&orderby=random') ) : ?>
-
-		<ul>
-
-		<?php while( have_books('status=unread&orderby=random') ) : the_book(); ?>
-
-			<li><a href="<?php book_permalink() ?>"><?php book_title() ?></a> by <?php book_author() ?></li>
-
-		<?php endwhile; ?>
-
-		</ul>
-
-	<?php else : ?>
-
-		<p>None</p>
-
-	<?php endif; ?>
-
-	<h3>Recent books:</h3>
-
-	<?php if( have_books('status=read&orderby=finished&order=desc') ) : ?>
-
-		<ul>
-
-		<?php while( have_books('status=read&orderby=finished&order=desc') ) : the_book(); ?>
-
-			<li><a href="<?php book_permalink() ?>"><?php book_title() ?></a> by <?php book_author() ?></li>
-
-		<?php endwhile; ?>
-
-		</ul>
-
-	<?php else : ?>
-
-		<p>None</p>
-
-	<?php endif; ?>
-
-	<p><a href="<?php library_url() ?>">View full Library</a></p>
+	
+	<div style="text-align:center"><?php library_search_form(); ?></div>
+	
+	<div style="display:none; text-align:center; font-size:120%; padding: 4px; text-shadow: 0 0 0.1em grey;" class="nr_ads">
+		<a href="http://blog.ashodnakashian.com/projects/now-reading-redux" target="_blank" style="text-decoration: none">
+		<i>Now Reading</i>
+		<div style="font-weight:bold; font-family: arial; position:relative; top:-7px; left:42px; font-size:140%; color:#999; text-shadow: 0 0 0.1em #FFFFCC;">Redux</div>
+		</a>
+	</div>
 
 </div>
