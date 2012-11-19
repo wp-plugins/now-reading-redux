@@ -12,7 +12,7 @@
  * $books = get_books('status=reading&orderby=started&order=asc&num=-1&reader=user');
  * </code>
  * @param string $query Query string containing restrictions on what to fetch.
- * 		 	Valid variables: $num, $status, $orderby, $order, $search, $author, $title, $reader.
+ * 		 	Valid variables: $num, $status, $orderby, $order, $search, $author, $title, $rating, $reader, $started_year, $started_month, $finished_year, $finished_month.
  * @param bool show_private If true, will show all readers' private books!
  * @return array Returns a numerically indexed array in which each element corresponds to a book.
  */
@@ -113,6 +113,31 @@ function get_books($query, $show_private = false) {
         }
     }
 
+    if (!empty($started_year))
+    {
+        $started_year = "AND YEAR(b_started) " . (is_numeric($started_year) ? "=" : "") . " $started_year";
+    }
+
+    if (!empty($started_month))
+    {
+        $started_month = "AND MONTH(b_started) " . (is_numeric($started_month) ? "=" : "") . " $started_month";
+    }
+
+    if (!empty($finished_year))
+    {
+        $finished_year = "AND YEAR(b_finished) " . (is_numeric($finished_year) ? "=" : "") . " $finished_year";
+    }
+
+    if (!empty($finished_month))
+    {
+        $finished_month = "AND MONTH(b_finished) " . (is_numeric($finished_month) ? "=" : "") . " $finished_month";
+    }
+
+	if (!empty($rating))
+	{
+		$rating = "AND b_rating " . (is_numeric($rating) ? "=" : "") . " $rating";
+	}
+
 	$reader = get_reader_visibility_filter($reader, $show_private);
 
     $query = "
@@ -138,6 +163,11 @@ function get_books($query, $show_private = false) {
         $title
         $tag
         $meta
+        $started_year
+        $started_month
+        $finished_year
+        $finished_month
+		$rating
 	AND
         $reader
 	GROUP BY
@@ -163,10 +193,9 @@ function get_books($query, $show_private = false) {
  * Fetches a single book with the given ID.
  * @param int $id The b_id of the book you want to fetch.
  */
-function get_book($id) {
+function get_book($id)
+{
     global $wpdb;
-
-    $options = get_option(NOW_READING_OPTIONS);
 
     $id = intval($id);
 
@@ -182,9 +211,9 @@ function get_book($id) {
 	GROUP BY b_id
         "));
 
-    $book->added = ( nr_empty_date($book->added) )	? '' : $book->added;
-    $book->started = ( nr_empty_date($book->started) )	? '' : $book->started;
-    $book->finished = ( nr_empty_date($book->finished) )	? '' : $book->finished;
+    $book->added = (nr_empty_date($book->added) ? '' : $book->added);
+    $book->started = (nr_empty_date($book->started) ? '' : $book->started);
+    $book->finished = (nr_empty_date($book->finished) ? '' : $book->finished);
 
     return $book;
 }

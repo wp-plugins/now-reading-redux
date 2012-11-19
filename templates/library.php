@@ -1,41 +1,47 @@
 <?php
-	global $book_query, $library_options, $shelf_title, $shelf_option;
-	$options = get_option(NOW_READING_OPTIONS);
-	$library_options = $options['libraryOptions'];
+/**
+ * Library template for the Now Reading plugin.
+ */
+global $book_query, $library_options, $shelf_title, $shelf_option;
+$options = get_option(NOW_READING_OPTIONS);
+$library_options = $options['libraryOptions'];
+get_header();
 ?>
 
 <?php wp_enqueue_script("jquery"); ?>
-
-<?php get_header(); ?>
 
 <style type="text/css">
 	<?php echo $library_options['css'] ?>
 </style>
 
-<div id="main-col">
-	<div id="container" class="now-reading nr_library">
-		<div id="content" role="main">
-			<div class="post fix nr-post">
-				<h1 class="post-title entry-title">Library</h1>
-			
+<div id="primary">
+	<div id="content" role="main" class="narrowcolumn primary now-reading">
+		<article <?php post_class('post nr-post'); ?>>
+			<header class="post-header">
+				<h1 class="posttitle"><?php echo stripslashes($library_options['title']) ?></h1>
+
 				<div class="bookdata fix">
-					
-					<?php if (can_now_reading_admin()) : ?>
-						<div class="manage">
-							<span class="icon">&nbsp;</span>
-							<p>Admin: &raquo; <a href="<?php manage_library_url() ?>">Manage Books</a></p>
-						</div>
-					<?php endif; ?>
-
-					<?php if ($library_options['showStats']) : ?>
-						<h3>Statistics</h3>
-						<p><?php print_book_stats() ?></p>
-					<?php endif; ?>
-
+<?php
+				if (can_now_reading_admin())
+				{
+?>
+					<div class="manage">
+						<span class="icon">&nbsp;</span>
+						<a href="<?php manage_library_url(); ?>"><?php _e('Manage Books', 'now-reading-redux');?></a>
+					</div>
+<?php
+				}
+?>
 				</div>
+			</header>
 
-				<div class="entry-content">
-				<?php
+			<?php if ($library_options['showStats']) : ?>
+				<h3>Statistics</h3>
+				<p><?php print_book_stats() ?></p>
+			<?php endif; ?>
+
+			<div class="booklisting">
+<?php
 					library_search_form();
 
 					// Reading.
@@ -62,15 +68,14 @@
 					$book_query = "status=read&orderby=finished&order=desc";
 					nr_load_template('shelf.php', false);
 
-					do_action('nr_footer');
-				?>
-				</div><!-- .entry-content -->
-			</div><!-- .post -->
-		</div><!-- #content -->
-	</div><!-- #container -->
+?>
+			</div><!-- /.booklisting -->
+		</article><!-- /.nr-post -->
+	</div><!-- /#content -->
+</div><!-- /#main-col -->
 
-	<?php get_sidebar() ?>
-	
-</div>
+<?php get_sidebar(); ?>
 
-<?php get_footer(); ?>
+<?php
+get_footer();
+?>

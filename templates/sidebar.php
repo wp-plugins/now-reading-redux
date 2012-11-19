@@ -1,4 +1,7 @@
 <?php
+/**
+ * Widget template for the Now Reading Redux plugin.
+ */
 	global $book_query, $library_options, $shelf_title, $shelf_option;
 	$options = get_option(NOW_READING_OPTIONS);
 	$library_options = $options['sidebarOptions'];
@@ -11,7 +14,12 @@
 <div class="now-reading nr_widget">
 
 	<div style="text-align:center">
-		<br /><b><a href="<?php library_url() ?>">View Full Library</a></b>
+		<br />
+		<div class="library">
+			<span class="icon">&nbsp;</span>
+			<a href="<?php library_url(); ?>"><?php _e('View Full Library', 'now-reading-redux');?></a>
+		</div>
+
 	</div>
 
 	<?php
@@ -39,19 +47,21 @@
 		$book_query = "status=read&orderby=finished&order=desc&num=" . $shelf_option['maxItems'];
 		nr_load_template('shelf.php', false);
 	?>
+<?php
 
-	</div>
-    
-	<?php if (have_wishlist_url()) : ?>
-		<div class="nr_wishlist"><b><a href="<?php wishlist_url() ?>">Buy me a gift!</a></b></div>
-	<?php endif; ?>
-	
+if (have_wishlist_url())
+{
+?>
+	<div class="nr_wishlist"><a href="<?php wishlist_url() ?>"><?php echo stripslashes($options['wishlistTitle']) ?></a></div>
+<?php
+}
+?>
 	<div style="text-align:center"><?php library_search_form(); ?></div>
-	
-	<div style="display:none; text-align:center; font-size:120%; padding: 4px; text-shadow: 0 0 0.1em grey;" class="nr_ads">
+
+	<div class="nr_ads">
 		<a href="http://blog.ashodnakashian.com/projects/now-reading-redux" target="_blank" style="text-decoration: none">
-		<i>Now Reading</i>
-		<div style="font-weight:bold; font-family: arial; position:relative; top:-7px; left:42px; font-size:140%; color:#999; text-shadow: 0 0 0.1em #FFFFCC;">Redux</div>
+		<div class="nr_now_reading">Now Reading</div>
+		<div class="nr_redux">Redux</div>
 		</a>
 	</div>
 

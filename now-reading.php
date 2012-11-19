@@ -1,16 +1,17 @@
 <?php
 /*
 Plugin Name: Now Reading Redux
-Version: 6.5.0.0
-Plugin URI: http://wordpress.org/extend/plugins/now-reading-redux/
-Description: Display the books you're reading, have read recently and plan to read, with cover art fetched automatically from Amazon.
+Version: 6.7.0.0
+Plugin URI: http://blog.ashodnakashian.com/projects/now-reading-redux/
+Description: Display the books you are reading, have read recently and plan to read, with cover art fetched automatically from Amazon.
 Author: Ashod Nakashian
 Author URI: http://blog.ashodnakashian.com
+License: GPL3
 */
 
-define('NOW_READING_VERSION', '6.5.0.0');
+define('NOW_READING_VERSION', '6.7.0.0');
 define('NOW_READING_DB_VERSION', 58);
-define('NOW_READING_OPTIONS_VERSION', 17);
+define('NOW_READING_OPTIONS_VERSION', 18);
 define('NOW_READING_REWRITE_VERSION', 9);
 
 define('NRTD', 'now-reading');
@@ -27,6 +28,12 @@ define('DEFAULT_SIDEBAR_CSS',
 	margin: 0 5px 5px 5px;
 	width: 67px;    /* Jacket image width. */
 	height: 100px;  /* Jacket image height. */
+}
+a.nr_booktitle, .library, .nr_nobooks, .nr_wishlist {
+    font-weight: bold;
+}
+a.nr_bookauthor {
+    font-style: italic;
 }
 .nr_widget {
 	padding-bottom: 20px;
@@ -83,6 +90,15 @@ define('DEFAULT_SIDEBAR_CSS',
 }
 .nr_widget:hover .nr_ads {
 	display: block !important;
+}
+.nr_ads {
+    display:none; text-align:center; font-size:120%; padding: 4px; text-shadow: 0 0 0.1em grey;
+}
+.nr_ads .nr_now_reading {
+    font-style: italic;
+}
+.nr_ads .nr_redux {
+    font-weight:bold; font-family: arial; position:relative; top:-7px; left:42px; font-size:140%; color:#999; text-shadow: 0 0 0.1em #FFFFCC;
 }
 .nr_wishlist {
 	text-align: center;
@@ -186,6 +202,8 @@ $locale = get_locale();
 $path = "wp-content/plugins/now-reading-redux/translations/$locale";
 load_plugin_textdomain(NRTD, $path);
 
+define('DEFAULT_LIBRARY_TITLE', 'Library');
+define('DEFAULT_WISHLIST_TITLE', 'Buy me a gift!');
 define('DEFAULT_UNREAD_TITLE', 'Planned');
 define('DEFAULT_ONHOLD_TITLE', 'On Hold');
 define('DEFAULT_READING_TITLE', 'Reading');
@@ -212,7 +230,7 @@ $nr_statuses = apply_filters('nr_statuses', array(
 $nr_post_options = apply_filters('nr_post_options', array(
     'link'	=> __('Add Link to Post', NRTD),
     'trans'	=> __('Transclude Post Content', NRTD),
-    'redirect'	=> __('Redirect to Post', NRTD)
+    'redir'	=> __('Redirect to Post', NRTD)
 ));
 
 /**
@@ -283,6 +301,21 @@ require_once dirname(__FILE__) . '/admin.php';
 require_once dirname(__FILE__) . '/default-filters.php';
 require_once dirname(__FILE__) . '/template-functions.php';
 require_once dirname(__FILE__) . '/widget.php';
+
+function nr_admin_notice()
+{
+    $options = get_option(NOW_READING_OPTIONS);
+    if ($options['httpLib'] == 'curl' && !function_exists('curl_init'))
+    {
+        $options['httpLib'] = 'snoopy';
+        update_option(NOW_READING_OPTIONS, $options);
+
+        echo '<div class="error">
+            <p>' . __('cURL is not available. Reverting to Snoopy.', NRTD) . '</p>
+            </div>';
+    }
+}
+add_action('admin_notices', 'nr_admin_notice');
 
 /**
  * Checks if the install needs to be run by checking the NOW_READING_VERSIONS option,
@@ -480,7 +513,8 @@ register_activation_hook('now-reading-redux/now-reading.php', 'nr_install');
 /**
  * Checks to see if the library/book permalink query vars are set and, if so, loads the appropriate templates.
  */
-function library_init() {
+function library_init()
+{
     global $wp, $wpdb, $q, $query, $wp_query;
 
     $wp->parse_request();
@@ -490,9 +524,11 @@ function library_init() {
     else
         return;
 
-    if ( get_query_var('now_reading_library') ) {
+    if (get_query_var('now_reading_library'))
+	{
     //filter by reader ?
-        if (get_query_var('now_reading_reader')) {
+        if (get_query_var('now_reading_reader'))
+		{
             $GLOBALS['nr_reader'] = intval(get_query_var('now_reading_reader'));
         }
         // Library page:
@@ -500,7 +536,8 @@ function library_init() {
         die;
     }
 
-    if ( get_query_var('now_reading_id') ) {
+    if (get_query_var('now_reading_id'))
+	{
     // Book permalink:
         $GLOBALS['nr_id'] = intval(get_query_var('now_reading_id'));
 
@@ -511,7 +548,8 @@ function library_init() {
         die;
     }
 
-    if ( get_query_var('now_reading_tag') ) {
+    if (get_query_var('now_reading_tag'))
+	{
     // Tag permalink:
         $GLOBALS['nr_tag'] = get_query_var('now_reading_tag');
 
@@ -522,7 +560,8 @@ function library_init() {
         die;
     }
 
-    if ( get_query_var('now_reading_page') ) {
+    if (get_query_var('now_reading_page'))
+	{
     // get page name from query string:
         $nrr_page = get_query_var('now_reading_page');
 
@@ -533,7 +572,8 @@ function library_init() {
         die;
     }
 
-    if ( get_query_var('now_reading_search') ) {
+    if (get_query_var('now_reading_search'))
+	{
     // Search page:
         $GLOBALS['query'] = $_GET['q'];
         unset($_GET['q']); // Just in case
@@ -545,7 +585,8 @@ function library_init() {
         die;
     }
 
-    if ( get_query_var('now_reading_author') && get_query_var('now_reading_title') ) {
+    if (get_query_var('now_reading_author') && get_query_var('now_reading_title'))
+	{
     // Book permalink with title and author.
         $author				= $wpdb->escape(urldecode(get_query_var('now_reading_author')));
         $title				= $wpdb->escape(urldecode(get_query_var('now_reading_title')));
@@ -567,7 +608,8 @@ function library_init() {
         die;
     }
 
-    if ( get_query_var('now_reading_author') ) {
+    if (get_query_var('now_reading_author'))
+	{
     // Author permalink.
         $author = $wpdb->escape(urldecode(get_query_var('now_reading_author')));
         $GLOBALS['nr_author'] = $wpdb->get_var("SELECT b_author FROM {$wpdb->prefix}now_reading WHERE b_nice_author = '$author'");
@@ -582,20 +624,21 @@ function library_init() {
         die;
     }
 
-	if ( get_query_var('now_reading_reader') ) {
-               // Reader permalink.
-               $reader = $wpdb->escape(urldecode(get_query_var('now_reading_reader')));
-               $GLOBALS['nr_reader'] = $wpdb->get_var("SELECT b_reader FROM {$wpdb->prefix}now_reading WHERE b_reader = '$reader'");
+	if (get_query_var('now_reading_reader'))
+	{
+	   // Reader permalink.
+	   $reader = $wpdb->escape(urldecode(get_query_var('now_reading_reader')));
+	   $GLOBALS['nr_reader'] = $wpdb->get_var("SELECT b_reader FROM {$wpdb->prefix}now_reading WHERE b_reader = '$reader'");
 
-               if ( empty($GLOBALS['nr_reader']) )
-                       die("Invalid reader");
+	   if ( empty($GLOBALS['nr_reader']) )
+			   die("Invalid reader");
 
-               $load = nr_load_template('reader.php');
-               if ( is_wp_error($load) )
-                       echo $load->get_error_message();
+	   $load = nr_load_template('reader.php');
+	   if ( is_wp_error($load) )
+			   echo $load->get_error_message();
 
-               die;
-       }
+	   die;
+   }
 }
 add_action('template_redirect', 'library_init');
 
@@ -606,23 +649,35 @@ add_action('template_redirect', 'library_init');
 function nr_load_template($filename, $require_once = true)
 {
     $filename = basename($filename);
-    $template = TEMPLATEPATH ."/now-reading-redux/$filename";
+    $template = "";
 
-	/*  check `now-reading` for backwards compatibility */
+    $options = get_option(NOW_READING_OPTIONS);
+    if ($options['userThemeTemplates'])
+    {
+        // Unfortunately, some of our template filenames are too generic
+        // and conflict with theme and other template filenames.
+        //$template = locate_template($filename, false, $require_once);
+        if (!file_exists($template))
+        {
+            $template = TEMPLATEPATH ."/now-reading-redux/$filename";
+        }
+
+        //  check `now-reading` for backwards compatibility.
+        if (!file_exists($template))
+        {
+            $template = TEMPLATEPATH . "/now-reading/$filename";
+        }
+    }
+
     if (!file_exists($template))
     {
-		$template = TEMPLATEPATH ."/now-reading/$filename";
-	}
+        $template = dirname(__FILE__) . "/templates/$filename";
+    }
 
     if (!file_exists($template))
     {
-		$template = dirname(__FILE__)."/templates/$filename";
-	}
-
-    if (!file_exists($template))
-    {
-		return new WP_Error('template-missing', sprintf(__("Oops! The template file %s could not be found in either the Now Reading template directory or your theme's Now Reading directory.", NRTD), "<code>$filename</code>"));
-	}
+        return new WP_Error('template-missing', sprintf(__("Oops! The template file %s could not be found in either the Now Reading template directory or your theme's Now Reading directory.", NRTD), "<code>$filename</code>"));
+    }
 
     load_template($template, $require_once);
 }
@@ -637,32 +692,54 @@ function nr_display() {
 /**
  * Adds our details to the title of the page - book title/author, "Library" etc.
  */
-function nr_page_title( $title ) {
+function nr_page_title($title)
+{
     global $wp, $wp_query;
     $wp->parse_request();
 
-    $title = '';
+    $subtitle = '';
 
-    if ( get_query_var('now_reading_library') )
-        $title = 'Library';
-
-    if ( get_query_var('now_reading_id') ) {
+    if (get_query_var('now_reading_library'))
+    {
+		$subtitle = __('Library', NRTD);
+	}
+	else
+    if (get_query_var('now_reading_id'))
+	{
         $book = get_book(intval(get_query_var('now_reading_id')));
-        $title = $book->title . ' by ' . $book->author;
+        $subtitle = $book->title . ' ' . __('by', NRTD) . ' ' . $book->author;
     }
+	else
+    if (get_query_var('now_reading_tag'))
+    {
+		$subtitle = __('Books tagged with', NRTD) . ' &ldquo;' . htmlentities(get_query_var('now_reading_tag'), ENT_QUOTES, 'UTF-8') . '&rdquo;';
+	}
+	else
+    if (get_query_var('now_reading_search'))
+    {
+		$subtitle = __('Library Search for', NRTD)  . ' &ldquo;' . htmlentities(search_query(false), ENT_QUOTES, 'UTF-8') . '&rdquo;';
+	}
+	else
+	if (get_query_var('now_reading_author'))
+	{
+		if (get_query_var('now_reading_title'))
+		{
+			$subtitle = urldecode(get_query_var('now_reading_title')) . ' ' . __('by', NRTD) . ' ' . urldecode(get_query_var('now_reading_author'));
+		}
+		else
+		{
+			$subtitle = __('Books by', NRTD) . ' &ldquo;' . urldecode(get_query_var('now_reading_author')) . '&rdquo;';
+		}
+	}
 
-    if ( get_query_var('now_reading_tag') )
-        $title = 'Books tagged with &ldquo;' . htmlentities(get_query_var('now_reading_tag'), ENT_QUOTES, 'UTF-8') . '&rdquo;';
-
-    if ( get_query_var('now_reading_search') )
-        $title = 'Library Search';
-
-    if ( !empty($title) ) {
-        $title = apply_filters('now_reading_page_title', $title);
+    if (!empty($subtitle))
+	{
+        $subtitle = apply_filters('now_reading_page_title', $subtitle);
         $separator = apply_filters('now_reading_page_title_separator', ' - ');
-        return $separator.$title;
+        return $subtitle . $separator . $title;
     }
-    return '';
+
+    return $title;
 }
 
 /**
@@ -691,5 +768,48 @@ if ( !function_exists('robm_dump') ) {
         echo '</pre>';
     }
 }
+
+function renderPhpToString($file, $vars=null)
+{
+    if (is_array($vars) && !empty($vars))
+    {
+        extract($vars);
+    }
+
+    ob_start();
+    nr_load_template($file, true);
+    return ob_get_clean();
+}
+
+// [nrr_shelf style="numbered" viz="show_text" status="all" num="-1" order="asc" finished_year="2011"]
+function nrr_shelf_shortcode_func($atts)
+{
+    extract( shortcode_atts( array(
+        'style' => 'list',  	// list, numbered, table.
+        'status' => 'all',  	// unread, reading, onhold, read, all.
+        'orderby' => 'finished',// reading, read, onhold, finished.
+        'order' => 'desc',  	// asc, desc.
+        'search' => '',			// A substring to match author, title.
+        'author' => '',			// The author to show books by.
+        'title' => '',			// The book title to show.
+		'rating' => '',			// Book rating Between 1 and 10 inclusive. May use '<', '<=', '=', '>', '>=' before number.
+        'reader' => '',			// The user's ID who added the book.
+        'started_year' => '',	// The started year in decimal. May use '<', '<=', '=', '>', '>=' before number.
+        'started_month' => '',	// The started month in decimal. May use '<', '<=', '=', '>', '>=' before number.
+        'finished_year' => '', 	// The finished year in decimal. May use '<', '<=', '=', '>', '>=' before number.
+        'finished_month' => '', // The finished month in decimal. May use '<', '<=', '=', '>', '>=' before number.
+        'num' => '-1',  		// The maximum number of items to show. -1 for all.
+        'viz' => 'show_text', 	// hide, show_text, show_image, show_image_text.
+        'items_per_row' => '1', // Number of books per row. Only for style=table.
+    ), $atts ) );
+
+    global $book_query, $library_options, $shelf_title, $shelf_option;
+    $shelf_option = array('viz' => $viz);
+    $library_options = array('renderStyle' => $style, 'itemsPerTableRow' => $items_per_row);
+    $book_query = "status={$status}&orderby={$orderby}&order={$order}&search={$search}&author={$author}&title={$title}&rating={$rating}&reader={$reader}&num={$num}&started_year={$started_year}&started_month={$started_month}&finished_year={$finished_year}&finished_month={$finished_month}";
+
+    return renderPhpToString('shelf.php');
+}
+add_shortcode('nrr_shelf', 'nrr_shelf_shortcode_func');
 
 ?>
